@@ -1,0 +1,4 @@
+repository "Fox@ssl://w1416857543-163-com@sh03-plasticscm.unity.cn:8787"
+  path "/"
+    smartbranch "/main/w1416857543" 
+     
