@@ -2,21 +2,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy_Frog : MonoBehaviour
+public class Enemy_Frog : Enemy
 {
     private Rigidbody2D rb;
-    private Animator Anim;
+    //private Animator Anim;
     private Collider2D coll;
     public LayerMask ground;
     public Transform leftpoint, rightpoint;
-    public float Speed,JumpForce;
+    public float Speed, JumpForce;
     private float leftx, rightx;
 
     private bool Faceleft = true;
-    void Start()
+    protected override void Start()
     {
+        base.Start();
         rb = GetComponent<Rigidbody2D>();
-        Anim = GetComponent<Animator>();
+        //Anim = GetComponent<Animator>();
         coll = GetComponent<Collider2D>();
 
         transform.DetachChildren();
@@ -35,14 +36,14 @@ public class Enemy_Frog : MonoBehaviour
 
     void Movement()
     {
-        if(Faceleft)//面向左侧
+        if (Faceleft)//面向左侧
         {
             if (coll.IsTouchingLayers(ground))
             {
                 Anim.SetBool("Jumping", true);
                 rb.velocity = new Vector2(-Speed, JumpForce);
             }
-            if((transform.position.x <= leftx))
+            if ((transform.position.x <= leftx))
             {
                 rb.velocity = new Vector2(0, 0);
                 transform.localScale = new Vector3(-1, 1, 1);
@@ -56,7 +57,7 @@ public class Enemy_Frog : MonoBehaviour
                 Anim.SetBool("Jumping", true);
                 rb.velocity = new Vector2(Speed, JumpForce);
             }
-            if ((transform.position.x >=rightx))
+            if ((transform.position.x >= rightx))
             {
                 rb.velocity = new Vector2(0, 0);
                 transform.localScale = new Vector3(1, 1, 1);
@@ -66,9 +67,9 @@ public class Enemy_Frog : MonoBehaviour
     }
 
 
-    void SwitchAnim()
+    void SwitchAnim()//移动动画效果
     {
-        if(Anim.GetBool("Jumping"))
+        if (Anim.GetBool("Jumping"))
         {
             if (rb.velocity.y < 0.1f)
             {
@@ -76,10 +77,11 @@ public class Enemy_Frog : MonoBehaviour
                 Anim.SetBool("Falling", true);
             }
         }
-        if(coll.IsTouchingLayers(ground) && Anim.GetBool("Falling"))
+        if (coll.IsTouchingLayers(ground) && Anim.GetBool("Falling"))
         {
             Anim.SetBool("Falling", false);
         }
 
     }
+
 }

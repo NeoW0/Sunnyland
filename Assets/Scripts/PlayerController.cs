@@ -9,6 +9,9 @@ public class PlayerController : MonoBehaviour
     private Animator anim;
 
     public Collider2D coll;
+    public Collider2D Discoll;
+    public Transform CellingCheck;
+    public AudioSource JumpAudio,HurtAudio,CherryAudio,MoveAudio;
     public float speed;
     public float jumpforce;
     public LayerMask ground;
@@ -35,21 +38,25 @@ public class PlayerController : MonoBehaviour
 
     void Movement()//角色移动
     {
+       
         float horizontalmove;
         float facedirection;
         horizontalmove=Input.GetAxis("Horizontal");
         facedirection = Input.GetAxisRaw("Horizontal");
-        rb.velocity = new Vector2(horizontalmove * speed*Time.deltaTime, rb.velocity.y);
+        rb.velocity = new Vector2(horizontalmove * speed*Time.fixedDeltaTime, rb.velocity.y);
         anim.SetFloat("Running", Mathf.Abs(horizontalmove));
         if(facedirection != 0)
         {
             transform.localScale = new Vector3(facedirection, 1, 1);
         }//角色方向
-        if(Input.GetButton("Jump")&& coll.IsTouchingLayers(ground))
+        if(Input.GetButtonDown("Jump")&& coll.IsTouchingLayers(ground))
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpforce * Time.deltaTime);
+            JumpAudio.Play();
             anim.SetBool("Jumping", true);//
         }//角色跳跃与跳跃动画
+
+        Crouch();
     }
 
     void SwitchAnim()//跳跃下落动画切换
@@ -91,32 +98,50 @@ public class PlayerController : MonoBehaviour
     {
         if(collision.tag == "Collection")
         {
+            CherryAudio.Play();
             Destroy(collision.gameObject);
             Cherry += 1;
             CherryNumber.text = Cherry.ToString();
         }
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnCollisionEnter2D(Collision2D collision)//消灭敌人加受伤
     {
         if (collision.gameObject.tag == "Enemy")
         {
+            Enemy enemy = collision.gameObject.GetComponent<Enemy>();
             if (anim.GetBool("Falling"))
-            { 
-                Destroy(collision.gameObject);
+            {
+                enemy.JumpOn();
                 rb.velocity = new Vector2(rb.velocity.x, jumpforce * Time.deltaTime);
                 anim.SetBool("Jumping", true);
             }else if(transform.position.x < collision.gameObject.transform.position.x)
             {
                 rb.velocity = new Vector2(-10, rb.velocity.y);
+                HurtAudio.Play();
                 isHurt = true;
             }else if(transform.position.x > collision.gameObject.transform.position.x)
             {
                 rb.velocity = new Vector2(10, rb.velocity.y);
+                HurtAudio.Play();
                 isHurt = true;
             }
         }
     }
 
+    void Crouch()//角色下蹲函数
+    {
+        if (!Physics2D.OverlapCircle(CellingCheck.position,0.4f,ground)) {
+            if (Input.GetButton("Crouch"))
+            {
+                anim.SetBool("Crouching", true);
+                Discoll.enabled = false;
+            } else if (Input.GetButtonUp("Crouch"))
+            {
+                anim.SetBool("Crouching", false);
+                Discoll.enabled = true;
+            }
+        }
 
+    }
 }
